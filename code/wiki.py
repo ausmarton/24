@@ -10,7 +10,7 @@ INDEX = """\
 <h1>24 Wiki</h1>
 <ul>
     <li><a href="/char/">Characters</a></li>
-    <li><a href="/killers/">Killers</a></li>
+    <li><a href="/top/victim_nationalities">Victim Nationalities</a></li>
 </ul>
 </body>
 </html>
@@ -60,6 +60,19 @@ CHAR = """\
 </html>
 """
 
+VICTIMS_BY_NATIONALITY = """\
+<html>
+<body>
+<h1>Top Victim Nationalities</h1>
+<ul>
+%for nationality in nationalities:
+    <li>{{nationality.name}} {{nationality.deaths}}</li>
+%end
+</ul>
+</body>
+</html>
+"""
+
 # Set up a link to the local graph database.
 graph = GraphDatabaseService()
 
@@ -76,6 +89,13 @@ def char_list():
     """
     query = "MATCH (c:Character) RETURN c.name AS name ORDER by c.name"
     return template(CHAR_LIST, chars=CypherQuery(graph, query).execute())
+
+@get('/top/victim_nationalities')
+def victim_nationalities_list():
+    """ Top victim nationalities.
+    """
+    query = "MATCH (a:Character)-[r:KILLED]->(b:Character) RETURN b.nationality as name, count(b.nationality) as deaths ORDER BY count(b.nationality) DESC"
+    return template(VICTIMS_BY_NATIONALITY, nationalities=CypherQuery(graph, query).execute())
 
 @get('/char/<name>')
 def char(name):
