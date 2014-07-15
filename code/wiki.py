@@ -10,6 +10,7 @@ INDEX = """\
 <h1>24 Wiki</h1>
 <ul>
     <li><a href="/char/">Characters</a></li>
+    <li><a href="/killers/">Killers</a></li>
 </ul>
 </body>
 </html>
@@ -33,6 +34,8 @@ CHAR = """\
 <body>
 <h1>{{char["name"]}}</h1>
 <dl>
+    <dt>Nationality:</dt>
+    <dd>{{char["nationality"]}}</dd>
     <dt>Played by:</dt>
     <dd>{{actor["name"]}}</dd>
     <dt>Appearances:</dt>
@@ -40,6 +43,14 @@ CHAR = """\
         <ul>
         %for appearance in appearances:
             <li>{{appearance.end_node["name"]}} ({{appearance["episodes"]}} episodes)</li>
+        %end
+        </ul>
+    </dd>
+    <dt>Killed:</dt>
+    <dd>
+        <ul>
+        %for victim in victims:
+            <li><a href="/char/{{victim.end_node['name']}}">{{victim.end_node['name']}}</a></li>
         %end
         </ul>
     </dd>
@@ -83,7 +94,9 @@ def char(name):
         # Otherwise pick up some more data and render a template.
         actor = next(char.match_incoming("STARRED_AS")).start_node
         appearances = char.match_outgoing("APPEARED_IN")
-        return template(CHAR, char=char, actor=actor, appearances=appearances)
+        victims = char.match_outgoing("KILLED")
+        
+        return template(CHAR, char=char, actor=actor, appearances=appearances, victims=victims)
 
 if __name__ == "__main__":
     run(host="localhost", port=8080)
