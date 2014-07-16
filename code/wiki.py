@@ -29,6 +29,19 @@ CHAR_LIST = """\
 </html>
 """
 
+NATIONALITY = """\
+<html>
+<body>
+<h1>{{nationality}}</h1>
+<ul>
+%for char in chars:
+    <li><a href="/char/{{char.name}}">{{char.name}}</a></li>
+%end
+</ul>
+</body>
+</html>
+"""
+
 CHAR = """\
 <html>
 <body>
@@ -96,6 +109,13 @@ def victim_nationalities_list():
     """
     query = "MATCH (a:Character)-[r:KILLED]->(b:Character) RETURN b.nationality as name, count(b.nationality) as deaths ORDER BY count(b.nationality) DESC"
     return template(VICTIMS_BY_NATIONALITY, nationalities=CypherQuery(graph, query).execute())
+
+@get('/nationality/<name>')
+def nationality(name):
+    """ Display characters with a given nationality
+    """
+    query = "MATCH (c:Character) WHERE c.nationality = '"+name+"' RETURN c.name AS name ORDER BY c.name"
+    return template(NATIONALITY, chars=CypherQuery(graph, query).execute(), nationality=name)
 
 @get('/char/<name>')
 def char(name):
